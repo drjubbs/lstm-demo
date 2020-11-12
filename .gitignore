@@ -131,3 +131,4 @@ dmypy.json
 # Custom for this project
 scaled/
 *.ipynb
+.vscode
