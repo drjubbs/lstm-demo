@@ -15,10 +15,6 @@ jupyter:
 
 # Workup of Data From FRED
 
-## Todo
-- Write unit testing for functions, particularly how the step-interploation
-  is working in extrapolation.
-
 ```python
 import os
 import json
@@ -32,10 +28,10 @@ from lstmutil import Scaler
 
 ## Data Interpolation
 
-Data sets will in general mismatch on both frequency and days available (e.g. financial data only available on trading days). Use step interpolation to fill in missed data and upsample as appropriate to a daily frequency. Change global varaible `BEGIN` to work with a smaller dataset.
+Data sets will in general mismatch on both frequency and days available (e.g. financial data only available on trading days). Use step interpolation to fill in missed data and upsample as appropriate to a daily frequency. All times given in UTC.
 
 ```python
-timeseries=TimeSeries(begin=datetime(1990,1,1))
+timeseries=TimeSeries(begin=datetime(1990,1,1), end=datetime.utcnow())
 ```
 
 ## Main Preprocessing
@@ -53,10 +49,10 @@ for series in series_list:
     # Clean & interpolate
     raw[series]=pd.read_csv("./input/"+series+".csv")
     clean[series]=timeseries.clean_ts(raw[series], "DATE", series)
-    interp[series]=timeseries.interpolate_series(clean[series], series, target_timestamps)
+    interp[series]=timeseries.interp_ts(clean[series], series, target_timestamps)
     
     # Merge back with the raw data, used in sanity checks later...
-    interp[series]=interp[series].merge(clean[series], on='timestamp', how='left', suffixes=('_interp', '_raw'))
+    interp[series]=interp[series].merge(clean[series], on=['date', 'timestamp'], how='left', suffixes=('_interp', '_raw'))
     
     if len(df_merge)==0:
         df_merge=interp[series].copy()
