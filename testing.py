@@ -30,6 +30,46 @@ class TestTimeSeries(unittest.TestCase):
         self.assertTrue(all([t.second==0 for t in times]))
 
 
+    def test_rolling_window(self):
+        """Unit tests for rolling horizon cross-validation"""
+
+        arr1 = np.array([i+1 for i in range(20)]).reshape(20, 1)
+        arr2 = 10.0*arr1
+        arr3 = 100.0*arr1
+        arr4 = -1 * arr1
+        arr5 = -2 * arr1
+        df_check = pd.DataFrame(np.concatenate([arr1, arr2, arr3, arr4, arr5],
+                                                axis=1))
+        df_check.columns = ['a1', 'a2', 'a3', 'b1', 'b2']
+        df_check['misc'] = np.random.rand(20)
+
+        x_flat, y_flat = lstmutil.TimeSeries.rolling_horizon(df_check,
+                                            x_cols=['a1', 'a2', 'a3'],
+                                            y_cols=['b1', 'b2'],
+                                            in_window=3,
+                                            out_window=2)
+
+        # Check shapes
+        self.assertEqual(x_flat.shape, (16, 9))
+        self.assertEqual(y_flat.shape, (16, 4))
+
+        # Check first and last row
+        self.assertTrue(
+            np.all(np.isclose(x_flat[0, :],
+                   np.array([1, 2, 3, 10, 20, 30, 100, 200, 300]))))
+        self.assertTrue(
+            np.all(np.isclose(y_flat[0, :],
+                    np.array([ -4,  -5,  -8, -10]))))
+
+        self.assertTrue(
+            np.all(np.isclose(x_flat[-1, :],
+                   np.array([ 16, 17, 18, 160, 170, 180, 1600, 1700, 1800]))))
+
+        self.assertTrue(
+            np.all(np.isclose(y_flat[-1, :],
+                   np.array([ -19, -20, -38, -40]))))
+
+
 class TestScaler(unittest.TestCase):
     """Test serialization and de-serialization of scikit-learn min/max scaler"""
 

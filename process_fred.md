@@ -24,6 +24,8 @@ import pandas as pd
 import plotly.graph_objects as go
 from lstmutil import TimeSeries
 from lstmutil import Scaler
+import numpy as np
+from sklearn.model_selection import TimeSeriesSplit
 ```
 
 ## Data Interpolation
@@ -102,6 +104,11 @@ df_scaled[interp_cols]=x_scaled
 ```
 
 ```python
+ # Down sample to monthly data
+df_scaled=df_scaled[[t.day==1 for t in df_scaled['date']]]
+```
+
+```python
 # Plot
 traces=[]
 for series in series_list:
@@ -115,6 +122,12 @@ for series in series_list:
 fig=go.Figure(data=traces)
 fig.show()    
 ```
+
+## Train/Test/Validation Splitting
+
+This is a complex topic, see notes in `README.md`. For now we'll keep things simple and predict 
+\[M+1, M+2, M+3\] based on the previous 2 years of data in a rolling window. We'll retain the last 5 years for final error esimation.
+
 
 ## Output to JSON
 

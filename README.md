@@ -4,6 +4,13 @@ Demonstration of using LSTM networks to forecast time series data. The demo incl
 
 At the moment, the project only includes a single notebook which does the data normalization. The `jupytext` plugin is used to convert the Jupyter notebooks to markdown which works well with `diff`.
 
+# Challenges with validation
+
+TIme series data in is general highly correlated in time (auto-correlation), so standard out of the box validation procedures like K-fold validation will not work. For an overview of the challenges see:
+
+- https://medium.com/@samuel.monnier/cross-validation-tools-for-time-series-ffa1a5a09bf9
+- ... more ... ?
+
 # Sample Data Sets
 
 | *Filename*       | *Description*                                           |

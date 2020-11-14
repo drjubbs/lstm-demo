@@ -79,6 +79,39 @@ class TimeSeries:
 
         return df_interp
 
+    @classmethod
+    def rolling_horizon(cls, df_in, x_cols, y_cols, in_window, out_window):
+        """Create train/test dataframes creating input of length `in_window`
+        and output of length out_window and rolling ahead one row each
+        iteration.
+
+        Assumes dataframe is sorted ascending by time.
+        """
+
+        # Convert to numpy
+        mat_x = df_in[x_cols].values
+        mat_y = df_in[y_cols].values
+
+        x_flat = None
+        y_flat = None
+        for i in range(len(df_in)-in_window-out_window+1):
+            train_i = i
+            train_j = i + in_window
+            test_i = i + in_window
+            test_j = i + in_window + out_window
+
+            if (x_flat is None) and (y_flat is None):
+                x_flat=mat_x[train_i:train_j, :].transpose().reshape(1,-1)
+                y_flat=mat_y[test_i:test_j, :].transpose().reshape(1,-1)
+            else:
+                x_new = mat_x[train_i:train_j, :].transpose().reshape(1,-1)
+                y_new = mat_y[test_i:test_j, :].transpose().reshape(1,-1)
+                x_flat = np.concatenate([x_flat, x_new])
+                y_flat = np.concatenate([y_flat, y_new])
+
+        return x_flat, y_flat
+
+
 class Scaler(MinMaxScaler):
     """Extend class to support JSON serialization."""
     def to_json(self):
