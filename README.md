@@ -14,6 +14,8 @@ The raw data from FRED is first cleaned and up-sampled to daily values using ste
 
 ![conditioned data](./images/scaled_x_vars.png)
 
+Note that we are not taking first differences or making any transformations (like `log y`), which would normally be done for time series data. The intent was to keep this analysis as simple as possible.
+
 ### Validation
 
 Time series data in is general highly correlated in time (auto-correlation), so standard out of the box validation procedures like K-fold validation will not work. For an overview of the challenges see:

@@ -131,7 +131,7 @@ This is a complex topic, see notes in `README.md`. For now we'll keep things sim
 ```python
 x_cols=[t+"_interp" for t in series_list]
 y_cols=["IPG2211A2N_interp"]
-times, x_rolling, y_rolling = TimeSeries.rolling_horizon(df_scaled, time_col="timestamp", x_cols=x_cols,  y_cols=y_cols, in_window=24, out_window=3)
+times, x_cols, y_cols, x_rolling, y_rolling = TimeSeries.rolling_horizon(df_scaled, time_col="timestamp", x_cols=x_cols,  y_cols=y_cols, in_window=24, out_window=3)
 dates=[datetime.utcfromtimestamp(t) for t in times]
 ```
 
@@ -156,11 +156,18 @@ fig.show()
 json_dict = {}
 json_dict['minmax_scaler']=mms.to_json()
 json_dict['df_clean']=df_scaled.to_json()
+json_dict['columns']=interp_cols
 json_dict['times']=times.tolist()
 json_dict['x_rolling']=x_rolling.tolist()
+json_dict['x_cols']=x_cols
 json_dict['y_rolling']=y_rolling.tolist()
+json_dict['y_cols']=y_cols
 if not os.path.exists('scaled'):
     os.makedirs('scaled')
 with open("./scaled/fred.json","w") as output_file:
     output_file.write(json.dumps(json_dict))
+```
+
+```python
+
 ```

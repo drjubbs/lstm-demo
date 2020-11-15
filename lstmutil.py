@@ -96,6 +96,20 @@ class TimeSeries:
 
         length_x = len(df_in)-in_window-out_window+1
 
+        # Create column labels. The data will be structed oldest
+        # to current time so we need to count up.
+        x_columns=[]
+        col_index=[t-in_window+1 for t in range(in_window)]
+        for column in x_cols:
+            for icol in ["_minus"+str(abs(t)) for t in col_index]:
+                x_columns.append(column+icol)
+
+        y_columns=[]
+        col_index=[t+1 for t in range(out_window)]
+        for column in y_cols:
+            for icol in ["_plus"+str(abs(t)) for t in col_index]:
+                y_columns.append(column+icol)
+
         x_flat = None
         y_flat = None
         times = np.zeros(length_x)
@@ -119,7 +133,7 @@ class TimeSeries:
                 y_flat = np.concatenate([y_flat, y_new])
 
         # Convert times to numpy
-        return  times, x_flat, y_flat
+        return  times, x_columns, y_columns, x_flat, y_flat
 
 
 class Scaler(MinMaxScaler):
