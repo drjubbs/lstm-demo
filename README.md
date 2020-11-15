@@ -22,7 +22,9 @@ Time series data in is general highly correlated in time (auto-correlation), so 
 - On the use of cross-validation for time series predictor evaluation. C Bergmeir, JM Benítez - Information Sciences, 2012 - Elsevier
 - A note on the validity of cross-validation for evaluating autoregressive time series prediction. C Bergmeir, RJ Hyndman, B Koo - Computational Statistics & Data Analysis, 2018 - Elsevier
 
-In this project we use a simple rolling horizon method, with a timestep of a single month. For example, at a single point in time, 24 different values of one of the predictors (the 1-year T-Bill) is used for modeling:![Image of series lag](\images\lag_example.png)
+In this project we use a simple rolling horizon method, with a timestep of a single month. For example, at a single point in time, 24 different values of one of the predictors (the 1-year T-Bill) is used for modeling:
+
+![Image of series lag](./images/lag_example.png)
 
 For for any given time, we have 24 x 4 = 96 predictors available. From this, we attempt to predict the electricity consumption at M+1, M+2, and M+3 (M=current month).
 
