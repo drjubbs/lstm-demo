@@ -10,7 +10,9 @@ Clone the repository and install the requirements (`requirements.txt`) into a vi
 
 ### Data Conditioning
 
-The raw data from FRED is first cleaned and up-sampled to daily values using step interpolation (previous value) to fill in gaps. Data outside of the range of values in extrapolated using the last know good value at either endpoint. The data is then put in the range [0,1] using the `MinMaxScaler` in `scikit-learn`:![conditioned data](./images/scaled_x_vars.png)
+The raw data from FRED is first cleaned and up-sampled to daily values using step interpolation (previous value) to fill in gaps. Data outside of the range of values in extrapolated using the last know good value at either endpoint. The data is then put in the range [0,1] using the `MinMaxScaler` in `scikit-learn`:
+
+![conditioned data](./images/scaled_x_vars.png)
 
 ### Validation
 
