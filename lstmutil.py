@@ -86,20 +86,28 @@ class TimeSeries:
         and output of length out_window and rolling ahead one row each
         iteration.
 
-        Assumes dataframe is sorted ascending by time.
+        Assumes dataframe is sorted ascending by time. Returned timestamp
+        correspond to the time at lag = 0
         """
 
         # Convert to numpy
         mat_x = df_in[x_cols].values
         mat_y = df_in[y_cols].values
 
+        length_x = len(df_in)-in_window-out_window+1
+
         x_flat = None
         y_flat = None
-        for i in range(len(df_in)-in_window-out_window+1):
+        times = np.zeros(length_x)
+
+        for i in range(length_x):
             train_i = i
             train_j = i + in_window
             test_i = i + in_window
             test_j = i + in_window + out_window
+
+            # Take the end time of the training data for "t0"
+            times[train_i]=df_in[time_col].values[train_j]
 
             if (x_flat is None) and (y_flat is None):
                 x_flat=mat_x[train_i:train_j, :].transpose().reshape(1,-1)
@@ -110,7 +118,8 @@ class TimeSeries:
                 x_flat = np.concatenate([x_flat, x_new])
                 y_flat = np.concatenate([y_flat, y_new])
 
-        return df_in[time_col].values, x_flat, y_flat
+        # Convert times to numpy
+        return  times, x_flat, y_flat
 
 
 class Scaler(MinMaxScaler):

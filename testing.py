@@ -52,9 +52,14 @@ class TestTimeSeries(unittest.TestCase):
                                             out_window=2)
 
         # Check times
-        self.assertTrue(np.all(times==np.array(range(20))))
+        self.assertTrue(np.all(np.isclose(
+          np.array([ 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]),
+          times
+        )))
+
 
         # Check shapes
+        self.assertEqual(len(times), len(x_flat))
         self.assertEqual(x_flat.shape, (16, 9))
         self.assertEqual(y_flat.shape, (16, 4))
 

@@ -10,7 +10,7 @@ Clone the repository and install the requirements (`requirements.txt`) into a vi
 
 ### Data Conditioning
 
-The raw data from FRED is first cleaned and up-sampled to daily values using step interpolation (previous value) to fill in gaps. Data outside of the range of values in extrapolated using the last know good value at either endpoint. The data is then put in the range [0,1] using the `MinMaxScaler` in `scikit-learn`:
+The raw data from FRED is first cleaned and up-sampled to daily values using step interpolation (previous value) to fill in gaps. Data outside of the range of values in extrapolated using the last know good value at either endpoint. The data is then put in the range [0,1] using an extended version of the `MinMaxScaler` in `scikit-learn` , `lstmutil.Scaler`. This modified scaler adds support for serialization to and from JSON.
 
 ![conditioned data](./images/scaled_x_vars.png)
 
@@ -28,7 +28,7 @@ In this project we use a simple rolling horizon method, with a timestep of a sin
 
 For for any given time, we have 24 x 4 = 96 predictors available. From this, we attempt to predict the electricity consumption at M+1, M+2, and M+3 (M=current month).
 
-# Sample Data Sets
+### Data sets used in this work
 
 | *Filename*       | *Description*                                           |
 | ---------------- | ------------------------------------------------------- |
