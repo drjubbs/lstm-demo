@@ -80,7 +80,8 @@ class TimeSeries:
         return df_interp
 
     @classmethod
-    def rolling_horizon(cls, df_in, x_cols, y_cols, in_window, out_window):
+    def rolling_horizon(cls, df_in, time_col, x_cols, y_cols, in_window,
+                        out_window):
         """Create train/test dataframes creating input of length `in_window`
         and output of length out_window and rolling ahead one row each
         iteration.
@@ -109,7 +110,7 @@ class TimeSeries:
                 x_flat = np.concatenate([x_flat, x_new])
                 y_flat = np.concatenate([y_flat, y_new])
 
-        return x_flat, y_flat
+        return df_in[time_col].values, x_flat, y_flat
 
 
 class Scaler(MinMaxScaler):

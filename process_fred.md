@@ -119,7 +119,7 @@ for series in series_list:
                     name=series+'_interp',
                     ))
 
-fig=go.Figure(data=traces)
+fig=go.Figure(data=traces, layout=dict(title="Scaled & interpolated x varaibles"))
 fig.show()    
 ```
 
@@ -128,14 +128,37 @@ fig.show()
 This is a complex topic, see notes in `README.md`. For now we'll keep things simple and predict 
 \[M+1, M+2, M+3\] based on the previous 2 years of data in a rolling window. We'll retain the last 5 years for final error esimation.
 
+```python
+x_cols=[t+"_interp" for t in series_list]
+y_cols=["IPG2211A2N_interp"]
+times, x_rolling, y_rolling = TimeSeries.rolling_horizon(df_scaled, time_col="timestamp", x_cols=x_cols,  y_cols=y_cols, in_window=24, out_window=3)
+dates=[datetime.utcfromtimestamp(t) for t in times]
+```
+
+```python
+# First columm should be lag 0, 10th lag ten, 20th lag 20, etc... plot an example# Plot
+traces=[]
+for xindex in [0, 9, 19]:
+    traces.append(go.Scatter(
+                    x=dates,
+                    y=x_rolling[:, xindex],
+                    mode='lines',
+                    name="Lag {}".format(xindex+1),
+                    ))
+
+fig=go.Figure(data=traces, layout=dict(title= "1 Year T-Bill @ various lags"))
+fig.show()
+```
 
 ## Output to JSON
 
 ```python
 json_dict = {}
 json_dict['minmax_scaler']=mms.to_json()
-json_dict['df_scaled']=df_scaled.to_json()
-
+json_dict['df_clean']=df_scaled.to_json()
+json_dict['times']=times.tolist()
+json_dict['x_rolling']=x_rolling.tolist()
+json_dict['y_rolling']=y_rolling.tolist()
 if not os.path.exists('scaled'):
     os.makedirs('scaled')
 with open("./scaled/fred.json","w") as output_file:

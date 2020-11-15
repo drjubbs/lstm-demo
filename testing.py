@@ -42,12 +42,17 @@ class TestTimeSeries(unittest.TestCase):
                                                 axis=1))
         df_check.columns = ['a1', 'a2', 'a3', 'b1', 'b2']
         df_check['misc'] = np.random.rand(20)
+        df_check['dates'] = [t for t in range(20)]
 
-        x_flat, y_flat = lstmutil.TimeSeries.rolling_horizon(df_check,
+        times, x_flat, y_flat = lstmutil.TimeSeries.rolling_horizon(df_check,
+                                            time_col="dates",
                                             x_cols=['a1', 'a2', 'a3'],
                                             y_cols=['b1', 'b2'],
                                             in_window=3,
                                             out_window=2)
+
+        # Check times
+        self.assertTrue(np.all(times==np.array(range(20))))
 
         # Check shapes
         self.assertEqual(x_flat.shape, (16, 9))
