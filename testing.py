@@ -30,7 +30,7 @@ class TestTimeSeries(unittest.TestCase):
         self.assertTrue(all([t.second==0 for t in times]))
 
 
-    def test_rolling_window(self):
+    def test_rolling_horizon(self):
         """Unit tests for rolling horizon cross-validation"""
 
         arr1 = np.array([i+1 for i in range(20)]).reshape(20, 1)
@@ -44,42 +44,52 @@ class TestTimeSeries(unittest.TestCase):
         df_check['misc'] = np.random.rand(20)
         df_check['dates'] = [t for t in range(20)]
 
-        times, x_cols, y_cols, x_flat, y_flat = \
+        times, x_cols, y_cols, x_roll, y_roll = \
             lstmutil.TimeSeries.rolling_horizon(df_check,
                                             time_col="dates",
                                             x_cols=['a1', 'a2', 'a3'],
                                             y_cols=['b1', 'b2'],
-                                            in_window=3,
+                                            in_window=5,
                                             out_window=2)
 
         # Check times
         self.assertTrue(np.all(np.isclose(
-          np.array([ 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]),
+          np.array([ 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18]),
           times
         )))
 
         # Check shapes
-        self.assertEqual(len(times), len(x_flat))
-        self.assertEqual(x_flat.shape, (16, 9))
-        self.assertEqual(y_flat.shape, (16, 4))
-        self.assertEqual(len(x_cols), 3*3)
+        self.assertEqual(len(times), len(x_roll))
+        self.assertEqual(x_roll.shape, (14, 15))
+        self.assertEqual(y_roll.shape, (14, 4))
+        self.assertEqual(len(x_cols), 5*3)
         self.assertEqual(len(y_cols), 2*2)
 
         # Check first and last row
         self.assertTrue(
-            np.all(np.isclose(x_flat[0, :],
-                   np.array([1, 2, 3, 10, 20, 30, 100, 200, 300]))))
+            np.all(np.isclose(x_roll[0, :],
+                   np.array([1, 10, 100,
+                             2, 20, 200,
+                             3, 30, 300,
+                             4, 40, 400,
+                             5, 50, 500]
+                        ))))
         self.assertTrue(
-            np.all(np.isclose(y_flat[0, :],
-                    np.array([ -4,  -5,  -8, -10]))))
+            np.all(np.isclose(y_roll[0, :],
+                    np.array([ -6,  -12,  -7, -14]))))
 
         self.assertTrue(
-            np.all(np.isclose(x_flat[-1, :],
-                   np.array([ 16, 17, 18, 160, 170, 180, 1600, 1700, 1800]))))
+            np.all(np.isclose(x_roll[-1, :],
+                   np.array([14, 140, 1400,
+                             15, 150, 1500,
+                             16, 160, 1600,
+                             17, 170, 1700,
+                             18, 180, 1800,]
+                        ))))
 
         self.assertTrue(
-            np.all(np.isclose(y_flat[-1, :],
-                   np.array([ -19, -20, -38, -40]))))
+            np.all(np.isclose(y_roll[-1, :],
+                   np.array([ -19, -38, -20, -40]))))
 
 
 class TestScaler(unittest.TestCase):

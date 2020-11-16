@@ -79,7 +79,7 @@ traces.append(go.Scatter(
                 x=t_test,
                 y=y_test[:,idx2],
                 mode='lines',                    
-                name=series+'IPG2211A2N (t+1)',
+                name='IPG2211A2N (t+1)',
                 ))
 
 fig=go.Figure(data=traces, layout=dict(title="Target values offset by 1 month"))
@@ -92,10 +92,9 @@ Search for optimal setting of LASSO parameter `alpha`. We will only include the 
 
 ```python
 df_col=3
-
 summary=[]
-for alpha in np.logspace(-5, -1, 30):
-    lasso=Lasso(alpha=alpha, max_iter=30000)
+for alpha in np.logspace(-4, -1, 50):
+    lasso=Lasso(alpha=alpha, max_iter=30000, tol=1.0e-7)
     tss=TimeSeriesSplit(n_splits=10)
     err=[]
     for tindex, vindex in tss.split(x_train):
@@ -121,5 +120,65 @@ fig.show()
 ```
 
 ```python
+alpha=df_lasso[df_lasso['MAE']==df_lasso['MAE'].min()]['alpha'].values[0]
+print("Refitting with alpha = {}".format(alpha))
+```
 
+```python
+lasso=Lasso(alpha=alpha, max_iter=30000, tol=1.0e-7)
+lasso.fit(x_train, y_train[:, :])
+```
+
+### Time Plots
+
+```python
+y_bar=lasso.predict(x_train)
+for title, i in zip(["M+1", "M+2", "M+3"],[0,1,2]):
+    s_model=(go.Scatter(
+                x=t_train,
+                y=y_bar[:, i],
+                mode='lines',))
+
+    s_actual=(go.Scatter(
+                x=t_train,
+                y=y_train[:, i],
+                mode='lines',))
+
+    
+    fig=go.Figure(data=[s_model, s_actual], layout=dict(title=title))
+    fig.show()
+```
+
+### Parity Plots
+
+```python
+y_bar=lasso.predict(x_train)
+for title, i in zip(["M+1", "M+2", "M+3"],[0,1,2]):
+    parity=go.Scatter(
+                x=y_train[:, i],
+                y=y_bar[:, i],
+                mode='markers',)
+
+    fig=go.Figure(data=parity, layout=\
+                dict(title="LASSO - "+title, 
+                     xaxis=dict(range=(0, 1)),
+                     yaxis=dict(range=(0, 1)),                     
+                    width=600,
+                    height=600,
+                 ))
+    fig.show()
+```
+
+# LSTM
+
+```python
+import tensorflow as tf
+from tensorflow.keras.layers import Dense, LSTM
+from tensorflow.keras.models import Sequential
+```
+
+```python
+tf_model = Sequential()
+tf_model.add(LSTM(4))
+tf_model.compile()
 ```

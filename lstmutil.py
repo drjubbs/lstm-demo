@@ -88,52 +88,62 @@ class TimeSeries:
 
         Assumes dataframe is sorted ascending by time. Returned timestamp
         correspond to the time at lag = 0
+
+        To work easily with TensorFlow (batches/time on main axis), with
+        window on the 2nd and features on the third, the order must be
+        blocked by time. For example, with two variables, A & B, the row
+        must be organized as:
+
+        [A(t=N) B(t=N) A(t=N-1) B(t=N-1) ... A(t=0) B(t=0)]
+
+        See README.md for a diagram.
+
         """
-
-        # Convert to numpy
-        mat_x = df_in[x_cols].values
-        mat_y = df_in[y_cols].values
-
-        length_x = len(df_in)-in_window-out_window+1
-
         # Create column labels. The data will be structed oldest
         # to current time so we need to count up.
         x_columns=[]
         col_index=[t-in_window+1 for t in range(in_window)]
-        for column in x_cols:
-            for icol in ["_minus"+str(abs(t)) for t in col_index]:
+        for icol in ["_minus"+str(abs(t)) for t in col_index]:
+            for column in x_cols:
                 x_columns.append(column+icol)
 
         y_columns=[]
         col_index=[t+1 for t in range(out_window)]
-        for column in y_cols:
-            for icol in ["_plus"+str(abs(t)) for t in col_index]:
+        for icol in ["_plus"+str(abs(t)) for t in col_index]:
+            for column in y_cols:
                 y_columns.append(column+icol)
 
-        x_flat = None
-        y_flat = None
-        times = np.zeros(length_x)
+        # Extract as numpy arrays and flatten
+        x_mat = df_in[x_cols].values
+        x_flat = x_mat.reshape(1,-1)
 
-        for i in range(length_x):
-            train_i = i
-            train_j = i + in_window
-            test_i = i + in_window
-            test_j = i + in_window + out_window
+        y_mat = df_in[y_cols].values
+        y_flat = y_mat.reshape(1,-1)
 
-            # Take the end time of the training data for "t0"
-            times[train_i]=df_in[time_col].values[train_j]
+        # Rolling will generate (# points - in_window - out_window + 1)
+        # samples.
+        num_rows = (x_mat.shape[0]-in_window-out_window+1)
 
-            if (x_flat is None) and (y_flat is None):
-                x_flat=mat_x[train_i:train_j, :].transpose().reshape(1,-1)
-                y_flat=mat_y[test_i:test_j, :].transpose().reshape(1,-1)
-            else:
-                x_new = mat_x[train_i:train_j, :].transpose().reshape(1,-1)
-                y_new = mat_y[test_i:test_j, :].transpose().reshape(1,-1)
-                x_flat = np.concatenate([x_flat, x_new])
-                y_flat = np.concatenate([y_flat, y_new])
+        # X matrix
+        num_x_features = x_mat.shape[1]
+        x_rolling = np.zeros((num_rows, num_x_features * in_window))
+        for idx in range(num_rows):
+            begin = idx * num_x_features
+            end = begin + in_window * num_x_features
+            x_rolling[idx, :] = x_flat[0, begin:end]
 
-        # Convert times to numpy
-        return  times, x_columns, y_columns, x_flat, y_flat
+        # Y matrix
+        num_y_features = y_mat.shape[1]
+        y_rolling = np.zeros((num_rows, num_y_features + out_window ))
+        for idx in range(num_rows):
+            begin = idx * num_y_features + in_window * num_y_features
+            end = begin + out_window * num_y_features
+            y_rolling[idx, :] = y_flat[0, begin:end]
+
+        # times
+        times = df_in[time_col][in_window:-out_window+1].values
+
+        return times, x_columns, y_columns, x_rolling,  y_rolling
 
 
 class Scaler(MinMaxScaler):

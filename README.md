@@ -16,6 +16,14 @@ The raw data from FRED is first cleaned and up-sampled to daily values using ste
 
 Note that we are not taking first differences or making any transformations (like `log y`), which would normally be done for time series data. The intent was to keep this analysis as simple as possible.
 
+### Rolling Horizon
+
+In order to prepare the data for linear and non-linear modeling, the concept of a rolling horizon is employed. Briefly, we define an input window and an output window, and the windows are slide forward in time. At each time-step, the data is vectorized.
+
+![Rolling Hoizron](./images/rolling_horizon.png)
+
+The data is unrolled (unraveled) feature first. For example, the example above has a input window size of 5 with 3 features and an output window size of 2 with two features. Row 6 above would be `[7, 70, 700, 8, 80, 800 ... 11, 110, 1100]` when unraveled.
+
 ### Validation
 
 Time series data in is general highly correlated in time (auto-correlation), so standard out of the box validation procedures like K-fold validation will not work. For an overview of the challenges see:
