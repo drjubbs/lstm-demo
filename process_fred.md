@@ -26,6 +26,18 @@ from lstmutil import TimeSeries
 from lstmutil import Scaler
 import numpy as np
 from sklearn.model_selection import TimeSeriesSplit
+
+%load_ext autoreload
+%autoreload 2
+```
+
+# Globals
+
+Size of input and output windows
+
+```python
+IN_WINDOW = 24
+OUT_WINDOW = 3
 ```
 
 ## Data Interpolation
@@ -131,19 +143,27 @@ This is a complex topic, see notes in `README.md`. For now we'll keep things sim
 ```python
 x_cols=[t+"_interp" for t in series_list]
 y_cols=["IPG2211A2N_interp"]
-times, x_cols, y_cols, x_rolling, y_rolling = TimeSeries.rolling_horizon(df_scaled, time_col="timestamp", x_cols=x_cols,  y_cols=y_cols, in_window=24, out_window=3)
+
+times, x_cols, y_cols, x_rolling, y_rolling = TimeSeries.rolling_horizon(
+    df_scaled,
+    time_col="timestamp",
+    x_cols=x_cols,
+    y_cols=y_cols,
+    in_window=IN_WINDOW,
+    out_window=OUT_WINDOW)
 dates=[datetime.utcfromtimestamp(t) for t in times]
 ```
 
 ```python
-# First columm should be lag 0, 10th lag ten, 20th lag 20, etc... plot an example# Plot
+# Plot lags... the data should be shifting to the left as lag is decresed 
 traces=[]
-for xindex in [0, 9, 19]:
+idxs = [x_cols.index(t) for t in ["DGS10_interp_minus23", "DGS10_interp_minus13", "DGS10_interp_minus0"]]
+for idx, lag in zip(idxs, [-23, -13, 0]):
     traces.append(go.Scatter(
                     x=dates,
-                    y=x_rolling[:, xindex],
+                    y=x_rolling[:, idx],
                     mode='lines',
-                    name="Lag {}".format(xindex+1),
+                    name="Lag {}".format(lag),
                     ))
 
 fig=go.Figure(data=traces, layout=dict(title= "1 Year T-Bill @ various lags"))
@@ -166,8 +186,4 @@ if not os.path.exists('scaled'):
     os.makedirs('scaled')
 with open("./scaled/fred.json","w") as output_file:
     output_file.write(json.dumps(json_dict))
-```
-
-```python
-
 ```

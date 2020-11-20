@@ -134,7 +134,7 @@ class TimeSeries:
 
         # Y matrix
         num_y_features = y_mat.shape[1]
-        y_rolling = np.zeros((num_rows, num_y_features + out_window ))
+        y_rolling = np.zeros((num_rows, num_y_features * out_window ))
         for idx in range(num_rows):
             begin = idx * num_y_features + in_window * num_y_features
             end = begin + out_window * num_y_features
